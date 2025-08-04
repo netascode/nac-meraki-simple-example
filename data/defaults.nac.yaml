@@ -1,0 +1,23 @@
+---
+meraki:
+  defaults:
+    organizations:
+      networks:
+        wireless:
+          ssids:
+            enabled: true
+            ip_assignment_mode: "Bridge mode"
+            use_vlan_tagging: false
+            
+        switch:
+          settings:
+            use_combined_power: false
+            uplink_client_sampling:
+              enabled: true
+              
+        appliance:
+          firewall_rules:
+            - comment: "Default Allow HTTP"
+              policy: "allow"
+              protocol: "tcp"
+              dest_port: "80"

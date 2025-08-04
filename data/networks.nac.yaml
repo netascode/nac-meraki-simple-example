@@ -1,0 +1,56 @@
+---
+meraki:
+  domains:
+    - name: "cisco.com" # Replace with your domain
+      administrator:
+        name: "admin@cisco.com" # Replace with your admin email
+      organizations:
+        - name: "Demo Organization"
+          networks:
+            - name: "Branch-Office-Demo"
+              product_types:
+                - appliance
+                - switch
+                - wireless
+                - camera
+                - sensor
+                - cellularGateway
+              time_zone: "America/Los_Angeles"
+              notes: "Branch office demo network"
+              tags:
+                - demo
+                - branch
+              
+              wireless:
+                ssids:
+                  - name: "Corporate-WiFi"
+                    ssid_number: "0"
+                    enabled: true
+                    auth_mode: "psk"
+                    psk: "DemoPassword123"
+                    encryption_mode: "wpa"
+                    wpa_encryption_mode: "WPA2 only"
+                    use_vlan_tagging: true
+                    default_vlan_id: 100
+                    
+                  - name: "Guest-WiFi"
+                    ssid_number: "1"
+                    enabled: true
+                    auth_mode: "open"
+                    splash_page: "Click-through splash page"
+                      
+              appliance:
+                vlans:
+                  - vlan_id: 100
+                    name: "Data VLAN"
+                    subnet: "10.1.100.0/24"
+                    appliance_ip: "10.1.100.1"
+                    dhcp_handling: "Run a DHCP server"
+                    dhcp_lease_time: "1 day"
+                    
+                  - vlan_id: 200
+                    name: "Voice VLAN"
+                    subnet: "10.1.200.0/24"
+                    appliance_ip: "10.1.200.1"
+                    dhcp_handling: "Run a DHCP server"
+                    dhcp_lease_time: "1 day"
