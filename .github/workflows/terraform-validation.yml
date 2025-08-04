@@ -1,0 +1,214 @@
+# GitHub Actions Workflow for NAC Meraki Simple Example
+# This workflow validates and tests the Terraform configuration
+
+name: Terraform Validation and Testing
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch: # Allow manual triggering
+  schedule:
+    - cron: '0 6 * * 1' # Weekly drift detection on Mondays at 6 AM
+
+env:
+  TF_VERSION: "1.9.0"
+  TF_IN_AUTOMATION: "true"
+  TF_INPUT: "false"
+  TF_CLI_ARGS: "-no-color"
+
+jobs:
+  # Terraform validation job
+  terraform-validate:
+    name: Terraform Validation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Cache Terraform providers
+        uses: actions/cache@v4
+        with:
+          path: |
+            .terraform
+            .terraform.lock.hcl
+          key: terraform-${{ runner.os }}-${{ hashFiles('**/.terraform.lock.hcl') }}
+          restore-keys: |
+            terraform-${{ runner.os }}-
+
+      - name: Terraform Init
+        run: terraform init -backend=false
+
+      - name: Terraform Validation
+        run: terraform validate
+
+      - name: Terraform Format Check
+        run: terraform fmt -check=true -recursive
+
+  # YAML validation job
+  yaml-validation:
+    name: YAML Validation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install YAML tools
+        run: |
+          pip install yamllint pyyaml
+
+      - name: Validate YAML syntax
+        run: |
+          echo "Validating YAML syntax..."
+          python -c "
+          import yaml
+          import sys
+          import os
+          
+          yaml_files = []
+          for root, dirs, files in os.walk('data'):
+              for file in files:
+                  if file.endswith(('.yaml', '.yml')):
+                      yaml_files.append(os.path.join(root, file))
+          
+          for yaml_file in yaml_files:
+              try:
+                  with open(yaml_file, 'r') as f:
+                      yaml.safe_load(f)
+                  print(f'✓ {yaml_file} - Valid YAML')
+              except yaml.YAMLError as e:
+                  print(f'✗ {yaml_file} - Invalid YAML: {e}')
+                  sys.exit(1)
+          "
+
+      - name: Run yamllint
+        run: |
+          yamllint data/ -d "{extends: default, rules: {line-length: {max: 120}, indentation: {spaces: 2}}}"
+
+  # Documentation check job
+  docs-check:
+    name: Documentation Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check documentation completeness
+        run: |
+          echo "Checking documentation completeness..."
+          if [ ! -f "README.md" ]; then
+            echo "ERROR: README.md is missing!"
+            exit 1
+          fi
+          
+          if ! grep -q "MERAKI_API_KEY" README.md; then
+            echo "WARNING: README.md doesn't mention MERAKI_API_KEY environment variable"
+          fi
+          
+          echo "Documentation check passed"
+
+  # Terraform plan job (manual trigger only)
+  terraform-plan:
+    name: Terraform Plan
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch'
+    needs: [terraform-validate, security-scan, yaml-validation]
+    environment: validation
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Cache Terraform providers
+        uses: actions/cache@v4
+        with:
+          path: |
+            .terraform
+            .terraform.lock.hcl
+          key: terraform-${{ runner.os }}-${{ hashFiles('**/.terraform.lock.hcl') }}
+          restore-keys: |
+            terraform-${{ runner.os }}-
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Plan
+        env:
+          MERAKI_API_KEY: ${{ secrets.MERAKI_API_KEY }}
+        run: |
+          echo "Using Meraki API Key from GitHub Secrets"
+          terraform plan -out=tfplan
+
+      - name: Generate Plan JSON
+        run: terraform show -json tfplan > tfplan.json
+
+      - name: Upload Plan Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: terraform-plan
+          path: |
+            tfplan
+            tfplan.json
+          retention-days: 7
+
+  # Configuration drift detection (scheduled only)
+  drift-detection:
+    name: Configuration Drift Detection
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule'
+    environment: validation
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Check for configuration drift
+        env:
+          MERAKI_API_KEY: ${{ secrets.MERAKI_API_KEY }}
+        run: |
+          echo "Checking for configuration drift..."
+          if terraform plan -detailed-exitcode; then
+            echo "No configuration drift detected."
+          else
+            exit_code=$?
+            if [ $exit_code -eq 2 ]; then
+              echo "Configuration drift detected!"
+              exit 1
+            fi
+          fi
+        continue-on-error: true
+
+      - name: Create drift detection issue
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: 'Configuration Drift Detected',
+              body: 'Automated drift detection found differences between the Terraform configuration and actual infrastructure state. Please review and address any drift.',
+              labels: ['infrastructure', 'drift-detection']
+            })
