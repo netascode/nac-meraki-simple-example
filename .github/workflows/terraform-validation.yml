@@ -123,7 +123,7 @@ jobs:
     name: Terraform Plan
     runs-on: ubuntu-latest
     if: github.event_name == 'workflow_dispatch'
-    needs: [terraform-validate, security-scan, yaml-validation]
+    needs: [terraform-validate, yaml-validation]
     environment: validation
     steps:
       - name: Checkout code
