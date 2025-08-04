@@ -106,5 +106,5 @@ For more advanced examples and complete documentation, visit the [netascode.cisc
 ## Support
 
 - For issues with the nac-meraki module: [GitHub Issues](https://github.com/netascode/terraform-meraki-nac-meraki/issues)
-- For Terraform provider issues: [Cisco DevNet](https://github.com/cisco-en-programmability/terraform-provider-meraki)
+- For Terraform provider issues: [Cisco DevNet](https://github.com/CiscoDevNet/terraform-provider-meraki)
 - For professional services: Contact Cisco CX Professional Services
