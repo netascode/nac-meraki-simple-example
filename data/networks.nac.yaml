@@ -1,9 +1,9 @@
 ---
 meraki:
   domains:
-    - name: "cisco.com" # Replace with your domain
+    - name: "cisco.com"  # Replace with your domain
       administrator:
-        name: "admin@cisco.com" # Replace with your admin email
+        name: "admin@cisco.com"  # Replace with your admin email
       organizations:
         - name: "Demo Organization"
           networks:
