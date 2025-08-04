@@ -1,23 +1,27 @@
----
-meraki:
-  defaults:
-    organizations:
-      networks:
-        wireless:
-          ssids:
-            enabled: true
-            ip_assignment_mode: "Bridge mode"
-            use_vlan_tagging: false
-            
-        switch:
-          settings:
-            use_combined_power: false
-            uplink_client_sampling:
+defaults:
+  meraki:
+    domains:
+      organizations:
+        networks:
+          wireless:
+            ssids:
               enabled: true
-              
-        appliance:
-          firewall_rules:
-            - comment: "Default Allow HTTP"
-              policy: "allow"
-              protocol: "tcp"
-              dest_port: "80"
+              ip_assignment_mode: "Bridge mode"
+              use_vlan_tagging: false
+          switch:
+            settings:
+              vlan: 1
+              use_combined_power: false
+              uplink_client_sampling: true
+              mac_blocklist: false
+          appliance:
+            firewall:
+              l3_firewall_rules:
+                rules:
+                  - comment: "Block Bad Traffic"
+                    policy: deny
+                    protocol: udp
+                    source_port: 1433
+                    source_cidr: Any
+                    destination_port: 1433
+                    destination_cidr: Any
