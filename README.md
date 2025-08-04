@@ -19,17 +19,7 @@ This repository contains a simple example of how to use Network as Code to manag
 
 2. **Configure authentication:**
    
-   Copy the example variables file and update with your credentials:
-   ```bash
-   cp terraform.tfvars.example terraform.tfvars
-   ```
-   
-   Edit `terraform.tfvars` and add your API key:
-   ```hcl
-   meraki_api_key = "your-actual-api-key-here"
-   ```
-
-   Alternatively, set environment variables:
+Set environment variables:
    ```bash
    export MERAKI_API_KEY="your-api-key-here"
    ```
@@ -56,8 +46,6 @@ nac-meraki-simple-example/
 │   ├── networks.nac.yaml    # Network and device configuration
 │   └── defaults.nac.yaml    # Organization-wide defaults
 ├── main.tf                  # Main Terraform module
-├── terraform.tf            # Provider configuration and variables
-├── terraform.tfvars.example # Example variables file
 └── README.md               # This file
 ```
 
@@ -119,4 +107,4 @@ For more advanced examples and complete documentation, visit the [netascode.cisc
 
 - For issues with the nac-meraki module: [GitHub Issues](https://github.com/netascode/terraform-meraki-nac-meraki/issues)
 - For Terraform provider issues: [Cisco DevNet](https://github.com/cisco-en-programmability/terraform-provider-meraki)
-- For professional services: Contact Cisco Professional Services
+- For professional services: Contact Cisco CX Professional Services
