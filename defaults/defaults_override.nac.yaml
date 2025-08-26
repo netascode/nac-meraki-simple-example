@@ -4,6 +4,10 @@ defaults:
     domains:
       organizations:
         networks:
+          device_claim_rate_limiting:
+            enabled: true
+            count: 10
+            interval: 300
           wireless:
             ssids:
               enabled: true
@@ -15,14 +19,3 @@ defaults:
               use_combined_power: false
               uplink_client_sampling: true
               mac_blocklist: false
-          appliance:
-            firewall:
-              l3_firewall_rules:
-                rules:
-                  - comment: "Block Bad Traffic"
-                    policy: deny
-                    protocol: udp
-                    source_port: 1433
-                    source_cidr: Any
-                    destination_port: 1433
-                    destination_cidr: Any

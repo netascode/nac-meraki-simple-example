@@ -44,7 +44,8 @@ Set environment variables:
 nac-meraki-simple-example/
 ├── data/
 │   ├── networks.nac.yaml    # Network and device configuration
-│   └── defaults.nac.yaml    # Organization-wide defaults
+├── defaults/
+│   └── defaults_override.nac.yaml    # Organization-wide defaults
 ├── main.tf                  # Main Terraform module
 └── README.md               # This file
 ```
@@ -71,7 +72,7 @@ Contains the main network configuration with the correct YAML structure:
 - Uses proper field names (`ssid_number`, `vlan_id`)
 - Matches validated test fixture format
 
-### defaults.nac.yaml
+### defaults/defaults_override.nac.yaml
 
 Defines organization-wide defaults that apply to all networks:
 - Wireless SSID defaults (enabled, IP assignment mode)
