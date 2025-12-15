@@ -4,7 +4,8 @@ This repository contains a simple example of how to use Network as Code to manag
 
 ## Prerequisites
 
-- [Terraform 1.8.0 or later](https://www.terraform.io/downloads)
+- [Terraform 1.6.0 or later](https://www.terraform.io/downloads)
+- Meraki Provider >= 1.9.0
 - [Git](https://github.com/git-guides/install-git)
 - A Meraki Dashboard account with API access enabled
 - A Meraki API key (generated from Dashboard > Organization > Settings > Dashboard API access)
@@ -42,12 +43,14 @@ Set environment variables:
 
 ```
 nac-meraki-simple-example/
+├── .schema.yaml             # YAML validation schema
 ├── data/
-│   ├── networks.nac.yaml    # Network and device configuration
+│   └── networks.nac.yaml    # Network and device configuration
 ├── defaults/
+│   ├── defaults.yaml        # Module defaults
 │   └── defaults_override.nac.yaml    # Organization-wide defaults
 ├── main.tf                  # Main Terraform module
-└── README.md               # This file
+└── README.md                # This file
 ```
 
 ## What This Example Creates
