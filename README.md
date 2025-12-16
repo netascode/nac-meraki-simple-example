@@ -47,7 +47,6 @@ nac-meraki-simple-example/
 ├── data/
 │   └── networks.nac.yaml    # Network and device configuration
 ├── defaults/
-│   ├── defaults.yaml        # Module defaults
 │   └── defaults_override.nac.yaml    # Organization-wide defaults
 ├── main.tf                  # Main Terraform module
 └── README.md                # This file
