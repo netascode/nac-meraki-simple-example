@@ -43,7 +43,6 @@ Set environment variables:
 
 ```
 nac-meraki-simple-example/
-├── .schema.yaml             # YAML validation schema
 ├── data/
 │   └── networks.nac.yaml    # Network and device configuration
 ├── defaults/
