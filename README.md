@@ -5,7 +5,6 @@ This repository contains a simple example of how to use Network as Code to manag
 ## Prerequisites
 
 - [Terraform 1.6.0 or later](https://www.terraform.io/downloads)
-- Meraki Provider >= 1.9.0
 - [Git](https://github.com/git-guides/install-git)
 - A Meraki Dashboard account with API access enabled
 - A Meraki API key (generated from Dashboard > Organization > Settings > Dashboard API access)
