@@ -1,0 +1,31 @@
+---
+# Two branch networks built from the shared "branch_baseline" template.
+# Each network references the template and supplies only its site-specific
+# values. Add a new site by copying a block and changing the variables -
+# no need to repeat the full wireless/appliance configuration.
+meraki:
+  domains:
+    - name: "cisco.com"  # same domain/org as networks.nac.yaml (merged)
+      organizations:
+        - name: "Demo Organization"
+          networks:
+            - name: "Rome-Branch-01"
+              templates:
+                - branch_baseline
+              variables:
+                data_subnet: "10.10.100.0/24"
+                data_gateway: "10.10.100.1"
+                voice_subnet: "10.10.200.0/24"
+                voice_gateway: "10.10.200.1"
+                corporate_ssid: "Rome-Corp"
+                corporate_psk: "RomePassword123"
+            - name: "Lisbon-Branch-01"
+              templates:
+                - branch_baseline
+              variables:
+                data_subnet: "10.20.100.0/24"
+                data_gateway: "10.20.100.1"
+                voice_subnet: "10.20.200.0/24"
+                voice_gateway: "10.20.200.1"
+                corporate_ssid: "Lisbon-Corp"
+                corporate_psk: "LisbonPassword123"
