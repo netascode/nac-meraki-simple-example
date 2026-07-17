@@ -1,0 +1,51 @@
+---
+# Reusable branch template.
+# Define the branch "blueprint" once here, then every site references it and
+# supplies only the values that differ (subnets, gateways, SSID name, PSK).
+# ${placeholder} values are provided per-network via the "variables:" map in
+# branches.nac.yaml. Change something here (e.g. a VLAN or SSID setting) and it
+# propagates to every branch that uses this template.
+meraki:
+  templates:
+    networks:
+      - name: branch_baseline
+        type: model
+        configuration:
+          product_types:
+            - appliance
+            - switch
+            - wireless
+          time_zone: "America/Los_Angeles"
+          tags:
+            - branch
+            - templated
+          appliance:
+            vlans:
+              - vlan_id: 100
+                name: "Data VLAN"
+                subnet: "${data_subnet}"
+                appliance_ip: "${data_gateway}"
+                dhcp_handling: "Run a DHCP server"
+                dhcp_lease_time: "1 day"
+              - vlan_id: 200
+                name: "Voice VLAN"
+                subnet: "${voice_subnet}"
+                appliance_ip: "${voice_gateway}"
+                dhcp_handling: "Run a DHCP server"
+                dhcp_lease_time: "1 day"
+          wireless:
+            ssids:
+              - name: "${corporate_ssid}"
+                ssid_number: "0"
+                enabled: true
+                auth_mode: "psk"
+                psk: "${corporate_psk}"
+                encryption_mode: "wpa"
+                wpa_encryption_mode: "WPA2 only"
+                use_vlan_tagging: true
+                default_vlan_id: 100
+              - name: "Guest-WiFi"
+                ssid_number: "1"
+                enabled: true
+                auth_mode: "open"
+                splash_page: "Click-through splash page"

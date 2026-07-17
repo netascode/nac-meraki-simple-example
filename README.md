@@ -1,6 +1,6 @@
 # Meraki Network as Code - Simple Example
 
-This repository contains a simple example of how to use Network as Code to manage Meraki cloud-managed networks. This example demonstrates basic network configuration including wireless SSIDs, security appliance VLANs, and default values.
+This repository contains a simple example of how to use Network as Code to manage Meraki cloud-managed networks. This example demonstrates basic network configuration including wireless SSIDs, security appliance VLANs, default values, and reusable configuration templates.
 
 ## Prerequisites
 
@@ -43,7 +43,9 @@ Set environment variables:
 ```
 nac-meraki-simple-example/
 ├── data/
-│   ├── networks.nac.yaml    # Network and device configuration
+│   ├── networks.nac.yaml    # Fully-defined example network
+│   ├── templates.nac.yaml   # Reusable "branch_baseline" template
+│   └── branches.nac.yaml    # Two branches built from the template
 ├── defaults/
 │   └── defaults_override.nac.yaml    # Organization-wide defaults
 ├── main.tf                  # Main Terraform module
@@ -61,6 +63,7 @@ nac-meraki-simple-example/
   - **Data VLAN** (100): 10.1.100.0/24 
   - **Voice VLAN** (200): 10.1.200.0/24
 - Organization-wide default settings for wireless, switch, and appliance
+- Two additional branches (**Rome-Branch-01**, **Lisbon-Branch-01**) generated from a shared template, each with its own subnets, gateways, and corporate SSID
 
 ## Configuration Files
 
@@ -78,6 +81,24 @@ Defines organization-wide defaults that apply to all networks:
 - Wireless SSID defaults (enabled, IP assignment mode)
 - Switch settings (power management, uplink sampling)
 - Appliance firewall rules
+
+### templates.nac.yaml and branches.nac.yaml
+
+These two files show how to scale a consistent branch design across many sites
+using **configuration templates**.
+
+- **`templates.nac.yaml`** defines a reusable template named `branch_baseline`
+  under `meraki.templates.networks`. It describes a complete branch — product
+  types, VLANs, and SSIDs — once, using `${placeholder}` values for the parts
+  that differ per site.
+- **`branches.nac.yaml`** defines two networks (`Rome-Branch-01` and
+  `Lisbon-Branch-01`) that reference the template with `templates: [branch_baseline]`
+  and supply their own values through a `variables:` map.
+
+Adding a new branch is a copy-paste of a short variable block, not the whole
+network definition. And because the shared design lives in one place, changing
+the template — for example updating a VLAN or an SSID setting — propagates to
+every branch that uses it, keeping sites consistent and free of drift.
 
 ## Security Best Practices
 
