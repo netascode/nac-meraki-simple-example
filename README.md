@@ -100,6 +100,29 @@ network definition. And because the shared design lives in one place, changing
 the template — for example updating a VLAN or an SSID setting — propagates to
 every branch that uses it, keeping sites consistent and free of drift.
 
+## NetBox as the source of truth for addressing (experimental)
+
+On this branch, the branch networks' subnets and gateways are read from [NetBox](https://netboxlabs.com/) instead of being written in `data/branches.nac.yaml`. `netbox.tf` uses read-only `e-breuninger/netbox` data sources and passes the result to the module's existing `model` input, which is deep-merged over `data/*.yaml`. The module and templates are unchanged.
+
+NetBox contract per branch network (names are mapped in `local.branches`):
+
+| NaC value | NetBox object |
+|-----------|---------------|
+| `<vlan>_subnet` (CIDR) | the single active prefix at the branch site with that VLAN ID |
+| `<vlan>_gateway` (plain IP) | the single IP of the MX device that falls inside that prefix |
+
+Zero or multiple matches fail the plan with an error. Nothing is created or changed in NetBox.
+
+```bash
+export TF_VAR_netbox_url="https://netbox.example.com"
+export TF_VAR_netbox_token="..."      # read-only token, never commit it
+terraform init && terraform plan
+```
+
+To try it against a **test** NetBox, `scripts/seed_netbox.py` creates the sample sites, devices, VLANs, prefixes and IPs (`NETBOX_URL` and `NETBOX_TOKEN` in the environment).
+
+Notes: the provider's tested NetBox range is 4.3 to 4.6; data source results (addresses, IDs) are stored in Terraform state.
+
 ## Security Best Practices
 
 - Never commit API keys to version control
