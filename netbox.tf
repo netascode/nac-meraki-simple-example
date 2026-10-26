@@ -10,19 +10,31 @@ terraform {
 }
 
 variable "netbox_url" {
-  description = "NetBox base URL, e.g. https://netbox.example.com"
+  description = "NetBox base URL, e.g. https://netbox.example.com. Required when enable_netbox = true."
   type        = string
+  default     = ""
 }
 
 variable "netbox_token" {
   description = "NetBox API token (read-only is sufficient). Set via TF_VAR_netbox_token."
   type        = string
   sensitive   = true
+  default     = ""
+}
+
+variable "enable_netbox" {
+  description = "Override subnets/gateways from NetBox. When false, no NetBox lookups are made and the YAML values are used."
+  type        = bool
+  default     = false
 }
 
 provider "netbox" {
-  server_url = var.netbox_url
-  api_token  = var.netbox_token
+  # Placeholders keep the provider configurable when NetBox is disabled (no data sources are read).
+  server_url = var.enable_netbox ? var.netbox_url : "http://netbox.disabled.invalid"
+  api_token  = var.enable_netbox ? var.netbox_token : "disabled"
+
+  # The provider probes NetBox at startup; skip that when NetBox is disabled.
+  skip_version_check = !var.enable_netbox
 }
 
 locals {
@@ -35,8 +47,11 @@ locals {
   # Template variable prefix => VLAN ID (matches templates.nac.yaml).
   vlans = { data = 100, voice = 200 }
 
+  # Empty when disabled, so every data source below has no instances.
+  active_branches = var.enable_netbox ? local.branches : {}
+
   branch_vlans = merge([
-    for net, b in local.branches : {
+    for net, b in local.active_branches : {
       for name, vid in local.vlans : "${net}/${name}" => {
         network = net, name = name, vid = vid, site = b.site, device = b.device
       }
@@ -45,12 +60,12 @@ locals {
 }
 
 data "netbox_site" "branch" {
-  for_each = local.branches
+  for_each = local.active_branches
   name     = each.value.site
 }
 
 data "netbox_devices" "mx" {
-  for_each = local.branches
+  for_each = local.active_branches
   filter {
     name  = "name"
     value = each.value.device
@@ -98,7 +113,7 @@ locals {
       organizations = [{
         name = "Demo Organization"
         networks = [
-          for net, b in local.branches : {
+          for net, b in local.active_branches : {
             name = net
             variables = merge([
               for name, vid in local.vlans : {

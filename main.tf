@@ -1,6 +1,6 @@
 module "meraki" {
-  source  = "netascode/nac-meraki/meraki"
+  source = "netascode/nac-meraki/meraki"
 
   yaml_directories = ["data"]
-  model            = local.netbox_model # addressing from NetBox, see netbox.tf
+  model            = var.enable_netbox ? local.netbox_model : {} # optional NetBox overlay, see netbox.tf
 }

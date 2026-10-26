@@ -100,9 +100,9 @@ network definition. And because the shared design lives in one place, changing
 the template — for example updating a VLAN or an SSID setting — propagates to
 every branch that uses it, keeping sites consistent and free of drift.
 
-## NetBox as the source of truth for addressing (experimental)
+## Optional: NetBox as the source of truth for addressing (experimental)
 
-On this branch, the branch networks' subnets and gateways are read from [NetBox](https://netboxlabs.com/) instead of being written in `data/branches.nac.yaml`. `netbox.tf` uses read-only `e-breuninger/netbox` data sources and passes the result to the module's existing `model` input, which is deep-merged over `data/*.yaml`. The module and templates are unchanged.
+By default the example is self-contained and uses the subnets and gateways written in `data/branches.nac.yaml`. Set `enable_netbox = true` to read them from [NetBox](https://netboxlabs.com/) instead: `netbox.tf` uses read-only `e-breuninger/netbox` data sources and passes the result to the module's existing `model` input, which is deep-merged over `data/*.yaml` so NetBox values override the YAML ones. The module and templates are unchanged. With the default (`false`), no NetBox provider call is made and no NetBox variables are needed.
 
 NetBox contract per branch network (names are mapped in `local.branches`):
 
@@ -114,6 +114,7 @@ NetBox contract per branch network (names are mapped in `local.branches`):
 Zero or multiple matches fail the plan with an error. Nothing is created or changed in NetBox.
 
 ```bash
+export TF_VAR_enable_netbox=true
 export TF_VAR_netbox_url="https://netbox.example.com"
 export TF_VAR_netbox_token="..."      # read-only token, never commit it
 terraform init && terraform plan
