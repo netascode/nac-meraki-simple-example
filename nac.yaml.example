@@ -13,9 +13,9 @@
 tools:
   nac_validate: "2.1.0"   # pin tool versions (module default: latest compatible)
   nac_test: "2.1.0"
-  terraform:
-    engine: terraform     # or tofu
-    version: "1.9.0"      # installed/used via tenv
+  # terraform:
+  #   engine: tofu        # or terraform; re-run `nac init` after changing it
+  #   version: "1.9.0"    # install/use this version via tenv (requires `tenv`)
 
 # Module default is local_sensitive_file.model -> model.yaml.
 # `target` is the full address, so it includes the module name from main.tf.
