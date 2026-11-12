@@ -4,7 +4,8 @@ This repository contains a simple example of how to use Network as Code to manag
 
 ## Prerequisites
 
-- [Terraform 1.8.0 or later](https://www.terraform.io/downloads)
+- [Terraform 1.8.0 or later](https://www.terraform.io/downloads) (or OpenTofu)
+- The [`nac` CLI](https://netascode.cisco.com/docs/tools/nac/installation/) (wraps Terraform, `nac-validate` and `nac-test`)
 - [Git](https://github.com/git-guides/install-git)
 - A Meraki Dashboard account with API access enabled
 - A Meraki API key (generated from Dashboard > Organization > Settings > Dashboard API access)
@@ -31,12 +32,41 @@ Set environment variables:
    - `admin@cisco.com` → your admin email
    - `Demo Organization` → your organization name
 
-4. **Initialize and apply:**
+4. **Run the workflow with the `nac` CLI:**
+   ```bash
+   nac setup      # check prerequisites, env vars and tool versions
+   nac init       # terraform init
+   nac validate   # render the data model and run nac-validate
+   nac plan
+   nac apply
+   nac test       # run nac-test against the rendered model
+   ```
+
+   The `nac` settings (render target, `model.yaml` output, required
+   `MERAKI_API_KEY`, tested `nac-validate`/`nac-test` versions) come from the
+   module's `nac/manifest.yaml`, so no `nac.yaml` is required. `nac setup` lists
+   the settings taken from the module (available after `nac init`).
+
+5. **(Optional) Override the module defaults with a `nac.yaml`:**
+   ```bash
+   cp nac.yaml.example nac.yaml
+   ```
+   Edit `nac.yaml` to pin tool versions, switch between `terraform` and `tofu`,
+   change the render output, or replace the required environment variables.
+   Settings in `nac.yaml` win key by key over the module defaults, and an
+   explicit `null` (e.g. `render: null`) turns a module default off. `nac.yaml`
+   is git-ignored here; see the
+   [configuration reference](https://netascode.cisco.com/docs/tools/nac/configuration/).
+
+   <details>
+   <summary>Plain Terraform still works</summary>
+
    ```bash
    terraform init
    terraform plan
    terraform apply
    ```
+   </details>
 
 ## Configuration Structure
 
@@ -49,6 +79,7 @@ nac-meraki-simple-example/
 ├── defaults/
 │   └── defaults_override.nac.yaml    # Organization-wide defaults
 ├── main.tf                  # Main Terraform module
+├── nac.yaml.example         # Optional nac CLI overrides (copy to nac.yaml)
 └── README.md               # This file
 ```
 
