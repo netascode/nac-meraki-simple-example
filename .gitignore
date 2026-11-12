@@ -12,3 +12,13 @@
 # OS
 .DS_Store
 Thumbs.db
+
+# nac CLI
+nac.yaml
+model.yaml
+plan.tfplan
+plan.txt
+plan.json
+validate.txt
+apply.txt
+tests/results/

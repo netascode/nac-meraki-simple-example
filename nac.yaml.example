@@ -1,0 +1,29 @@
+# OPTIONAL: nac CLI overrides.
+#
+# The nac-meraki module ships its own nac CLI defaults in nac/manifest.yaml
+# (render target, output file, required env vars, tested nac-validate/nac-test
+# versions), so this file is NOT needed to run `nac`. To override any of them,
+# copy this file to `nac.yaml`:
+#
+#   cp nac.yaml.example nac.yaml
+#
+# Settings here take precedence key by key over the module defaults.
+# Docs: https://netascode.cisco.com/docs/tools/nac/configuration/
+
+tools:
+  nac_validate: "2.1.0"   # pin tool versions (module default: latest compatible)
+  nac_test: "2.1.0"
+  # terraform:
+  #   engine: tofu        # or terraform; re-run `nac init` after changing it
+  #   version: "1.9.0"    # install/use this version via tenv (requires `tenv`)
+
+# Module default is local_sensitive_file.model -> model.yaml.
+# `target` is the full address, so it includes the module name from main.tf.
+render:
+  target: module.meraki.local_sensitive_file.model
+  output: model.yaml
+
+# Replaces the module's list of required environment variables.
+env:
+  required:
+    - MERAKI_API_KEY
